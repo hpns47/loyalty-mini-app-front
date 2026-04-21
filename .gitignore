@@ -1,3 +1,4 @@
 cloudflared.deb
 .env
 node_modules
+dist

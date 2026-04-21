@@ -67,7 +67,7 @@ export const CashierPage: FC = () => {
         }
 
         const data = await res.json() as StampRedeemResponse
-        const { newStampCount, isRewardReady, userName } = data.stamp
+        const { newStampCount, isRewardReady, userName, stampThreshold } = data.stamp
 
         if (isRewardReady) {
           setPageState({
@@ -80,7 +80,7 @@ export const CashierPage: FC = () => {
             status: 'stamp_success',
             firstName: userName,
             stampCount: newStampCount,
-            stampThreshold: 10,
+            stampThreshold,
           })
           setTimeout(() => {
             setPageState({ status: 'scanning' })

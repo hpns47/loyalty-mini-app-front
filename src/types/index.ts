@@ -2,6 +2,13 @@
 
 export type LoyaltyCardStatus = "active" | "reward_ready";
 
+export enum ShopCategory {
+    COFFEE = "coffee",
+    FOOD = "food",
+    TEA = "tea",
+    OTHER = "other",
+}
+
 export interface User {
     id: string;
     telegram_id: number;
@@ -63,6 +70,7 @@ export interface StampRedeemResponse {
         newStampCount: number;
         isRewardReady: boolean;
         userName: string;
+        stampThreshold: number;
     };
 }
 

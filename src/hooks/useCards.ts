@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { apiClient } from '../lib/api-client'
 import { getCachedCards, setCachedCards, isStale, isStatusUntrusted } from '../lib/offline-cache'
 import { showToast } from '../lib/toast'
+import { ShopCategory } from '../types'
 
 export interface CardSummary {
   id: string
   shop_id: string
   shop_name: string
+  shop_category: ShopCategory
   stamp_count: number
   status: string
   stamp_threshold: number

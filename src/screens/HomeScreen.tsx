@@ -1,8 +1,3 @@
-/**
- * HomeScreen — Main hub screen showing a greeting, active loyalty widget,
- * category filter chips, and a horizontal list of nearby/recent shops.
- */
-
 import { useState, useEffect } from 'react'
 import type { FC } from 'react'
 import { AvatarSample } from '../components/AvatarSample'
@@ -14,12 +9,20 @@ import { PlaceChip } from '../components/PlaceChip'
 import { CardSkeleton, ListSkeleton } from '../components/Skeleton'
 import { getTelegramWebApp } from '../lib/telegram'
 import { useCards } from '../hooks/useCards'
+import { ShopCategory } from '../types'
+
+const CATEGORY_CHIPS: { label: string; value: ShopCategory | null }[] = [
+  { label: 'Все',   value: null },
+  { label: 'Кофе',  value: ShopCategory.COFFEE },
+  { label: 'Еда',   value: ShopCategory.FOOD },
+  { label: 'Чай',   value: ShopCategory.TEA },
+  { label: 'Другое', value: ShopCategory.OTHER },
+]
 
 export interface HomeShop {
   id: string
   name: string
   photoUrl?: string
-  category?: string
   stampsCollected?: number
 }
 
@@ -41,8 +44,6 @@ export interface HomeScreenProps {
   onQrClick?: () => void
 }
 
-const CATEGORIES = ['Все', 'Кофе', 'Еда', 'Чай']
-
 export const HomeScreen: FC<HomeScreenProps> = ({
   userName = 'Guest',
   userAvatarUrl,
@@ -51,7 +52,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onShopClick,
   onQrClick,
 }) => {
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0])
+  const [activeCategory, setActiveCategory] = useState<ShopCategory | null>(null)
   const { cards, loading, error, refetch } = useCards()
 
   // Root screen — hide both Telegram buttons
@@ -61,7 +62,11 @@ export const HomeScreen: FC<HomeScreenProps> = ({
     tg?.MainButton?.hide?.()
   }, [])
 
-  const displayShops = cards.map((c) => ({
+  const filteredCards = activeCategory === null
+    ? cards
+    : cards.filter((c) => c.shop_category === activeCategory)
+
+  const displayShops = filteredCards.map((c) => ({
     id: c.shop_id,
     name: c.shop_name,
     stampsCollected: c.stamp_count,
@@ -140,13 +145,13 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
             {/* Category filter chips */}
             <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-              {CATEGORIES.map((cat) => (
+              {CATEGORY_CHIPS.map((chip) => (
                 <Chips
-                  key={cat}
-                  label={cat}
+                  key={chip.label}
+                  label={chip.label}
                   size="big"
-                  focused={activeCategory === cat}
-                  onClick={() => setActiveCategory(cat)}
+                  focused={activeCategory === chip.value}
+                  onClick={() => setActiveCategory(chip.value)}
                 />
               ))}
             </div>
