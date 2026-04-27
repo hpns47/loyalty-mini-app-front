@@ -9,6 +9,7 @@ import { AvatarSample } from '../components/AvatarSample'
 import { Dock, type DockTab } from '../components/Dock'
 import { IconButton } from '../components/IconButton'
 import { SalesRow, type SalesRowProps } from '../components/SalesRow'
+import { TransactionSkeleton } from '../components/Skeleton'
 import { getTelegramWebApp } from '../lib/telegram'
 
 export interface ProfileScreenProps {
@@ -18,6 +19,7 @@ export interface ProfileScreenProps {
   username?: string
   /** Transaction history items */
   transactions?: Omit<SalesRowProps, 'className'>[]
+  transactionsLoading?: boolean
   activeTab?: DockTab
   onTabChange?: (tab: DockTab) => void
   /** Opens the user's personal QR code */
@@ -30,6 +32,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = ({
   telegramId,
   username,
   transactions = [],
+  transactionsLoading = false,
   activeTab = 'profile',
   onTabChange,
   onShowQr,
@@ -74,18 +77,18 @@ export const ProfileScreen: FC<ProfileScreenProps> = ({
 
       {/* Transaction history */}
       <div className="flex-1 overflow-y-auto pb-28 px-4 space-y-2">
-        {transactions.length > 0 ? (
-          <>
-            <h2
-              className="text-sm font-semibold mb-3"
-              style={{ color: 'var(--tg-theme-text-color, #0E121B)' }}
-            >
-              История
-            </h2>
-            {transactions.map((tx, i) => (
-              <SalesRow key={i} {...tx} />
-            ))}
-          </>
+        <h2
+          className="text-sm font-semibold mb-3"
+          style={{ color: 'var(--tg-theme-text-color, #0E121B)' }}
+        >
+          История
+        </h2>
+        {transactionsLoading ? (
+          <TransactionSkeleton count={4} />
+        ) : transactions.length > 0 ? (
+          transactions.map((tx, i) => (
+            <SalesRow key={i} {...tx} />
+          ))
         ) : (
           <div
             className="flex h-32 items-center justify-center rounded-2xl text-sm"

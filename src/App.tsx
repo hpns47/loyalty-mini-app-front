@@ -25,7 +25,7 @@ function parseShopQr(scanned: string): string | null {
 function App() {
   const { user, loading } = useAuth()
   const { shopId } = useDeepLink()
-  const { history: stampHistory } = useStampHistory()
+  const { history: stampHistory, loading: stampHistoryLoading } = useStampHistory()
   const [screen, setScreen] = useState<Screen>('home')
   const [cardDismissed, setCardDismissed] = useState(false)
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null)
@@ -110,6 +110,7 @@ function App() {
           username={user?.username ?? undefined}
           telegramId={user?.telegram_id}
           transactions={transactions}
+          transactionsLoading={stampHistoryLoading}
           activeTab={activeTab}
           onTabChange={handleTabChange}
           onShowQr={() => setScreen('qrShow')}

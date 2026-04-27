@@ -73,7 +73,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   }))
   const activeCard = cards.find((c) => c.status === 'reward_ready') ?? cards[0]
   const displayActiveShop = activeCard
-    ? { id: activeCard.shop_id, name: activeCard.shop_name, stampsCollected: activeCard.stamp_count }
+    ? { id: activeCard.shop_id, name: activeCard.shop_name, stampsCollected: activeCard.stamp_count, stampThreshold: activeCard.stamp_threshold }
     : undefined
 
   return (
@@ -140,6 +140,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               <LoyaltyWidget
                 shopName={displayActiveShop.name}
                 stampsCollected={displayActiveShop.stampsCollected ?? 0}
+                totalStamps={displayActiveShop.stampThreshold}
               />
             )}
 

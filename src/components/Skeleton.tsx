@@ -32,6 +32,27 @@ export const CardSkeleton: FC<{ className?: string }> = ({ className = '' }) => 
 )
 
 /**
+ * TransactionSkeleton — mimics SalesRow (375×67px transaction history rows).
+ */
+export const TransactionSkeleton: FC<{ count?: number }> = ({ count = 4 }) => (
+  <div className="space-y-2">
+    {Array.from({ length: count }, (_, i) => (
+      <div
+        key={i}
+        className="flex w-full animate-pulse items-center justify-between rounded-2xl px-2.5 py-3"
+        style={{ backgroundColor: PULSE_BG, minHeight: '67px' }}
+      >
+        <div className="flex flex-col gap-1.5">
+          <div className="h-4 w-32 rounded-full" style={{ backgroundColor: '#D0D5DD' }} />
+          <div className="h-3 w-24 rounded-full" style={{ backgroundColor: '#D0D5DD' }} />
+        </div>
+        <div className="h-7 w-12 rounded-xl" style={{ backgroundColor: '#D0D5DD' }} />
+      </div>
+    ))}
+  </div>
+)
+
+/**
  * ListSkeleton — mimics PlaceChip horizontal row (247×140px cards).
  */
 export const ListSkeleton: FC<{ count?: number }> = ({ count = 3 }) => (
