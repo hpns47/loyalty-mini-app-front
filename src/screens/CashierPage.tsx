@@ -24,45 +24,39 @@ export const CashierPage: FC = () => {
   const [pageState, setPageState] = useState<PageState>({ status: 'validating' })
   const [scanKey, setScanKey] = useState(0)
 
-  // Sync auth status into page state on first transition
   if (auth.status !== 'validating' && pageState.status === 'validating') {
     setPageState({ status: auth.status === 'valid' ? 'scanning' : 'invalid' })
   }
 
   const base = import.meta.env.VITE_API_URL as string
 
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${auth.accessToken ?? ''}`,
+  }
+
   const handleScan = useCallback(
     async (qrToken: string) => {
-      if (!auth.shopId) return
+      if (!auth.accessToken) return
 
       const userId = decodeJwtSub(qrToken)
 
       try {
         const res = await fetch(`${base}/api/v1/stamps/redeem`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            qrToken,
-            shopId: auth.shopId,
-            cashierKey: auth.cashierKey,
-          }),
+          headers: authHeaders,
+          body: JSON.stringify({ qrToken }),
         })
 
         if (res.status === 409) {
           setPageState({ status: 'qr_used' })
-          setTimeout(() => {
-            setPageState({ status: 'scanning' })
-            setScanKey((k) => k + 1)
-          }, 3000)
+          setTimeout(() => { setPageState({ status: 'scanning' }); setScanKey((k) => k + 1) }, 3000)
           return
         }
 
         if (!res.ok) {
           setPageState({ status: 'qr_used' })
-          setTimeout(() => {
-            setPageState({ status: 'scanning' })
-            setScanKey((k) => k + 1)
-          }, 3000)
+          setTimeout(() => { setPageState({ status: 'scanning' }); setScanKey((k) => k + 1) }, 3000)
           return
         }
 
@@ -70,48 +64,29 @@ export const CashierPage: FC = () => {
         const { newStampCount, isRewardReady, userName, stampThreshold } = data.stamp
 
         if (isRewardReady) {
-          setPageState({
-            status: 'reward_ready',
-            firstName: userName,
-            userId: userId ?? '',
-          })
+          setPageState({ status: 'reward_ready', firstName: userName, userId: userId ?? '' })
         } else {
-          setPageState({
-            status: 'stamp_success',
-            firstName: userName,
-            stampCount: newStampCount,
-            stampThreshold,
-          })
-          setTimeout(() => {
-            setPageState({ status: 'scanning' })
-            setScanKey((k) => k + 1)
-          }, 3000)
+          setPageState({ status: 'stamp_success', firstName: userName, stampCount: newStampCount, stampThreshold })
+          setTimeout(() => { setPageState({ status: 'scanning' }); setScanKey((k) => k + 1) }, 3000)
         }
       } catch {
         setPageState({ status: 'qr_used' })
-        setTimeout(() => {
-          setPageState({ status: 'scanning' })
-          setScanKey((k) => k + 1)
-        }, 3000)
+        setTimeout(() => { setPageState({ status: 'scanning' }); setScanKey((k) => k + 1) }, 3000)
       }
     },
-    [auth.shopId, auth.cashierKey, base],
+    [auth.accessToken, base], // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   const handleRedeem = useCallback(async () => {
-    if (pageState.status !== 'reward_ready' || !auth.shopId) return
+    if (pageState.status !== 'reward_ready' || !auth.accessToken) return
 
     const { userId } = pageState
 
     try {
       await fetch(`${base}/api/v1/rewards/redeem`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          shopId: auth.shopId,
-          cashierKey: auth.cashierKey,
-        }),
+        headers: authHeaders,
+        body: JSON.stringify({ userId }),
       })
     } catch {
       // Best-effort — reset to scanning regardless
@@ -119,7 +94,7 @@ export const CashierPage: FC = () => {
 
     setPageState({ status: 'scanning' })
     setScanKey((k) => k + 1)
-  }, [pageState, auth.shopId, auth.cashierKey, base])
+  }, [pageState, auth.accessToken, base]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -135,12 +110,10 @@ export const CashierPage: FC = () => {
         padding: '24px 16px',
       }}
     >
-      {/* Header */}
       <div style={{ marginBottom: 32, textAlign: 'center' }}>
         <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>Cashier Scanner</h1>
       </div>
 
-      {/* State machine render */}
       {pageState.status === 'validating' && (
         <div style={{ textAlign: 'center', color: '#99A0AE' }}>
           <div
