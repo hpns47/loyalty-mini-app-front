@@ -60,8 +60,6 @@ export interface UserQrResponse {
 
 export interface StampRedeemRequest {
     qrToken: string;
-    shopId: string;
-    cashierKey: string;
 }
 
 export interface StampRedeemResponse {
